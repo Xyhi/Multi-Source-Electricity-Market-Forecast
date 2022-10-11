@@ -13,7 +13,7 @@ And we will build the final model by conducting differtent routes. Here are the 
 
 This project officially started in early September 2022 and will be continuously updated and optimized.
 
-
+项目环境：Python3.9 + Pytorch + Cuda 11.3
 
 项目结构如下
 
