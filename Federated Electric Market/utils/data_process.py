@@ -64,7 +64,7 @@ def seq_to_mul(seq_len, B, num, path):
             # 将seq序列以及相应的天气特征加入
             for j in range(i, i + seq_len):
                 x = [load[j]]
-                for c in range(-2, 0):
+                for c in range(1,3):
                     x.append(dataset[j][c])
                 train_seq.append(x)
 

@@ -5,8 +5,8 @@ import torch
 # 多输出LSTM
 def args():
     parser = argparse.ArgumentParser()
-
-    parser.add_argument('--epochs', type=int, default=100, help='input dimension')
+    # model selection and train
+    parser.add_argument('--epochs', type=int, default=50, help='input dimension')
     parser.add_argument('--input_size', type=int, default=3, help='input dimension')
     parser.add_argument('--seq_len', type=int, default=7, help='seq len')
     parser.add_argument('--output_size', type=int, default=1, help='output dimension')
@@ -20,7 +20,18 @@ def args():
     parser.add_argument('--bidirectional', type=bool, default=True, help='LSTM direction')
     parser.add_argument('--step_size', type=int, default=5, help='step size')
     parser.add_argument('--gamma', type=float, default=0.1, help='gamma')
-    parser.add_argument('--repeated', type=int, default=20, help='the repeated num of training')
+    parser.add_argument('--repeated', type=int, default=10, help='the repeated num of training')
+
+    # federated params
+    parser.add_argument('--local_epochs', type=int, default=10, help='the epochs of local client training')
+    parser.add_argument('--local_bs', type=int, default=10, help='the batch size of local client training')
+    parser.add_argument('--frac', type=float, default=0.3, help='the ratio of selected clients per epoch')
+    parser.add_argument('--num_users', type=float, default=112, help='the total num of clients')
+    parser.add_argument('--all_clients', type=bool, default=False, help='aggregation over all clients')
+    parser.add_argument('--tol_epochs', type=int, default=10, help='rounds of total training')
+    parser.add_argument('--local_repeated', type=int, default=1, help='indicates the local clients update')
+    parser.add_argument('--contrast', type=bool, default=True, help='indicates whether to use local epochs')
+    parser.add_argument('--show_result', type=bool, default=True, help='indicates whether to show the result')
 
     args = parser.parse_args()
 
