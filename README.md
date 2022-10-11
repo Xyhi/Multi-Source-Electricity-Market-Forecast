@@ -51,8 +51,10 @@ This project officially started in early September 2022 and will be continuously
 
   options：存放了所有模型训练的参数
 
+  ---
+
   model_avg：进行联邦学习运算，为本项目的主要运行代码
 
   model_contrast：对比没有使用联邦学习的训练效果
-
+  
   result_show：展示联邦学习训练中，在时序图中的具体效果
