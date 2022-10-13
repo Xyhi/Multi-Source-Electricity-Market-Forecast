@@ -67,4 +67,4 @@ This project officially started in early September 2022 and will be continuously
   
   result_show：展示联邦学习训练中，在时序图中的具体效果
 
-Tips：本次代码重构，抽象出Client、Server，并利用观察者模式，将model_avg于Server解耦，增强了代码的可读性和维护的方便性
+Tips：本次代码重构，抽象出Client、Server，并利用观察者模式，将model_avg与Server解耦，增强了代码的可读性和维护的方便性
