@@ -25,7 +25,7 @@ def args():
     # federated params
     parser.add_argument('--local_epochs', type=int, default=10, help='the epochs of local client training')
     parser.add_argument('--local_bs', type=int, default=10, help='the batch size of local client training')
-    parser.add_argument('--frac', type=float, default=0.1, help='the ratio of selected clients per epoch')
+    parser.add_argument('--frac', type=float, default=0.01, help='the ratio of selected clients per epoch')
     parser.add_argument('--num_users', type=float, default=112, help='the total num of clients')
     parser.add_argument('--all_clients', type=bool, default=False, help='aggregation over all clients')
     parser.add_argument('--tol_lr', type=float, default=0.01, help='learning rate of server training')
@@ -33,8 +33,7 @@ def args():
     parser.add_argument('--local_repeated', type=int, default=1, help='indicates the local clients update')
     parser.add_argument('--contrast', type=bool, default=True, help='indicates whether to use local epochs')
     parser.add_argument('--show_result', type=bool, default=True, help='indicates whether to show the result')
-    parser.add_argument('--clip', type=float, default=100, help='the gradient clip')
-    parser.add_argument('--laplace_lambda', type=float, default=0.01, help='the laplace noise lambda')
+    parser.add_argument('--round', type=int, default=8, help='The number of digits retained')
 
     args = parser.parse_args()
 
