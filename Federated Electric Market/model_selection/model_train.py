@@ -4,7 +4,7 @@ from torch.optim.lr_scheduler import StepLR
 from tqdm import tqdm
 import numpy as np
 from utils.data_process import seq_to_mul
-from models.models import BiLSTM, CNN_LSTM, CNN_LSTM_2
+from model.models import BiLSTM, CNN_LSTM, CNN_LSTM_2
 import copy
 
 
@@ -89,5 +89,5 @@ def train(args, train_data, val_data, path, flag):
         print('epoch {:03d} train_loss {:.8f} val_loss {:.8f}'.format(epoch, np.mean(train_loss), val_loss))
         model.train()
 
-    state = {'models': best_model.state_dict()}
+    state = {'model': best_model.state_dict()}
     torch.save(state, path)

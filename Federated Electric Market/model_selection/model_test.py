@@ -3,13 +3,13 @@ import numpy as np
 import torch
 from tqdm import tqdm
 from utils.data_process import device, get_mape
-from models.models import BiLSTM, CNN_LSTM, CNN_LSTM_2
+from model.models import BiLSTM, CNN_LSTM, CNN_LSTM_2
 
 
 def test(args, test_data, path, max_load, min_load, flag):
     pred = []
     y = []
-    print('loading models...')
+    print('loading model...')
     if flag == 1:
         model = BiLSTM(args).to(device)
     elif flag == 2:
@@ -18,7 +18,7 @@ def test(args, test_data, path, max_load, min_load, flag):
         model = CNN_LSTM_2(args).to(device)
 
     # 加载相关的state_dict
-    model.load_state_dict(torch.load(path)['models'])
+    model.load_state_dict(torch.load(path)['model'])
     model.eval()
     print('predicting...')
     for (seq, target) in tqdm(test_data):

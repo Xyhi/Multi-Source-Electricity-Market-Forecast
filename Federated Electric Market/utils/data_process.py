@@ -39,7 +39,7 @@ def seq_to_mul(seq_len, B, num, path):
 
     # 先简单预测每天的平均载荷
     # 利用max_load,min_load进行最大最小标准化
-    # -9为数据集中载荷的列标
+    # -1为数据集中载荷的列标
     load_index = -1
     max_load = np.max(train_data[train_data.columns[load_index]])
     min_load = np.min(train_data[train_data.columns[load_index]])
@@ -64,7 +64,7 @@ def seq_to_mul(seq_len, B, num, path):
             # 将seq序列以及相应的天气特征加入
             for j in range(i, i + seq_len):
                 x = [load[j]]
-                for c in range(1,3):
+                for c in range(1, 3):
                     x.append(dataset[j][c])
                 train_seq.append(x)
 

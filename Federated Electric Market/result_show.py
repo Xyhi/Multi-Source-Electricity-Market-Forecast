@@ -1,6 +1,6 @@
 from utils.options import args
 from model_selection.model_train import load_data
-from models.Test import test
+from model.Test import test
 import warnings
 warnings.filterwarnings('ignore')
 root_path = './source_data/data'
