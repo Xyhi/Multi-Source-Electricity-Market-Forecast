@@ -52,6 +52,7 @@ class client():
             optimizer = torch.optim.SGD(self.model.parameters(), lr=self.args.lr,
                                         momentum=0.9, weight_decay=self.args.weight_decay)
 
+        # scheduler （StepLR）：用于调整学习率，每隔step_size调整一次学习率，gamma为学习率乘法因子
         scheduler = StepLR(optimizer, step_size=self.args.step_size, gamma=self.args.gamma)
 
         # 总训练误差
@@ -61,7 +62,7 @@ class client():
             train_loss = []
             for (seq, label) in train_data:
                 seq, label = seq.to(self.args.device), label.to(self.args.device)
-                self.model.zero_grad()
+                self.model.zero_grad()              # 梯度清0
                 y_pred = self.model(seq)
                 loss = loss_function(y_pred, label)
                 train_loss.append(loss.item())
@@ -71,8 +72,9 @@ class client():
             # 为最后的梯度信息加上Laplace噪声后上传
             tol_loss.append(sum(train_loss)/len(train_loss))
             # 使用gamma调整学习率
-            scheduler.step()
+            scheduler.step()    # 经过step_size次step 调整一次学习率
 
+            # 训练模式
             self.model.train()
 
         # 对所有的模型参数利用rsa公钥进行加密并上传

@@ -24,7 +24,7 @@ class MyDataset(Dataset):
         return len(self.data)
 
 
-# 搭建序列多输出数据集
+# 搭建序列多输出数据集  num为预测数，应该与输出层个数相等
 def seq_to_mul(seq_len, B, num, path):
     data = load_data(path)
     # 划分训练集,验证集,测试集

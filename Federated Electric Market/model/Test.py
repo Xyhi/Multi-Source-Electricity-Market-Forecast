@@ -17,7 +17,7 @@ def test(args, test_data, path, max_load, min_load):
     model.load_state_dict(torch.load(path)['model'])
     model.eval()
     for (seq, target) in test_data:
-        target = list(chain.from_iterable(target.data.tolist()))
+        target = list(chain.from_iterable(target.data.tolist()))    # chain.from_iterable 将多个迭代器逐个迭代出来
         y.extend(target)
         seq = seq.to(device)
         with torch.no_grad():
@@ -41,7 +41,7 @@ def plot(y, pred):
     x = [i for i in range(1, len(y)+1)]
 
     x_smooth = np.linspace(np.min(x), np.max(x), 500)
-    y_smooth = make_interp_spline(x, y)(x_smooth)
+    y_smooth = make_interp_spline(x, y)(x_smooth)   # 数据平滑处理（插值填充）
     plt.plot(x_smooth, y_smooth, c='green', marker='*', ms=1, alpha=0.75, label='true')
 
     y_smooth = make_interp_spline(x, pred)(x_smooth)

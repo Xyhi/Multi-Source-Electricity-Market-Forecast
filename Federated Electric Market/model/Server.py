@@ -20,7 +20,7 @@ class server():
         self.frac = args.frac
         self.all_clients = args.all_clients
         self.weight_decay = args.weight_decay
-        self.round = args.round
+        self.round = args.round     # 保留位数
 
         self.iter = 0  # 返回迭代的次数
         self.rsa_public_k, self.rsa_private_k = self.get_rsa_key()  # server端持有rsa的私钥
@@ -95,17 +95,17 @@ class server():
         else:
             # 按照一定比例选择client
             m = max(int(self.frac * self.num_users), 1)
-            idxs_users = np.random.choice(range(self.num_users), m, replace=False)
+            idxs_users = np.random.choice(range(self.num_users), m, replace=False)  # 这里num_users112
             clients = [self.client_list[i] for i in idxs_users]
 
         for one_client in clients:
-            parameter, loss = one_client.train()
+            parameter, loss = one_client.train()    # 这里的parameter和loss是加密过的
             parameter_list.append(parameter)
             loss_list.append(loss)
 
         parameters = []
-        shape_list = get_shape_list(self.model)
-        # 对server端传来的parameter进行解密
+        shape_list = get_shape_list(self.model) # 获取参数的numpy格式
+        # 对server端传来的parameter进行解密 （这里应该是client端？）
         print('server is decrypting')
         for item in parameter_list:
             m = rsaDecrypt(item, self.rsa_private_k)
