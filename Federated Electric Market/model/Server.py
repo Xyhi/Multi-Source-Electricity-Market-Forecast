@@ -7,7 +7,11 @@ from utils.parameter_tran import get_shape_list, str_to_parameter, parameter_to_
 from utils.rsa_algo import rsa_key_generator, rsaDecrypt
 from utils.aes_algo import aes_key_generator, aesDecrypt, aesEncrypt
 torch.multiprocessing.set_sharing_strategy('file_system')
-
+import os
+# 创建文件夹
+def build_dir(path):
+    if not os.path.exists(path):
+        os.makedirs(path)  # 如果不存在目录figure_save_path，则创建
 
 # 搭建联邦学习的服务端
 class server():
@@ -25,7 +29,9 @@ class server():
         self.iter = 0  # 返回迭代的次数
         self.rsa_public_k, self.rsa_private_k = self.get_rsa_key()  # server端持有rsa的私钥
         self.aes_k = self.get_aes_key()  # client端持有aes密钥
+        print('server get key completed')
         self.client_list = self.build_all_clients()
+        print('server build_all_clients completed')
         self.model = BiLSTM(args).to(args.device)
         self.notice(self.client_list)
 
@@ -85,7 +91,7 @@ class server():
     #
     #         model_params[i].data = torch.tensor(temp_data)
 
-    def train(self):
+    def train(self,arg_name, arg_val):
         parameter_list = []
         loss_list = []
 
@@ -98,8 +104,8 @@ class server():
             idxs_users = np.random.choice(range(self.num_users), m, replace=False)
             clients = [self.client_list[i] for i in idxs_users]
 
-        for one_client in clients:
-            parameter, loss = one_client.train()
+        for num, one_client in enumerate(clients):
+            parameter, loss = one_client.train(num)
             parameter_list.append(parameter)
             loss_list.append(loss)
 
@@ -107,8 +113,14 @@ class server():
         shape_list = get_shape_list(self.model)
         # 对server端传来的parameter进行解密
         print('server is decrypting')
+        # for item in parameter_list:
+        #     m = rsaDecrypt(item, self.rsa_private_k)
+        #     param = str_to_parameter(m, shape_list, self.round)
+        #     parameters.append(param)
+        # print('server decryption completes')
+        # 用aes解密（节省时间）
         for item in parameter_list:
-            m = rsaDecrypt(item, self.rsa_private_k)
+            m = aesDecrypt(item, self.aes_k)
             param = str_to_parameter(m, shape_list, self.round)
             parameters.append(param)
         print('server decryption completes')
@@ -134,8 +146,9 @@ class server():
         self.notice(self.client_list, c)
 
         state = {'model': self.model.state_dict()}
-        torch.save(state, './network/network{}.pkl'.format(self.iter))
+        build_dir('./network/{}/{}'.format(arg_name, arg_val))
+        torch.save(state, './network/{}/{}/network{}.pkl'.format(arg_name, arg_val,self.iter))
 
         self.iter += 1
         # 返回损失误差
-        return np.mean(loss_list)
+        return np.mean(loss_list,axis=0)
