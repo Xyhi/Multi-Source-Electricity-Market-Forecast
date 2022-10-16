@@ -14,6 +14,7 @@ def aes_key_generator():
 def aesEncrypt(m, aes_k):
     cipher = AES.new(aes_k.encode('utf8'), AES.MODE_ECB)
     c = cipher.encrypt(pad(m, BLOCK_SIZE))
+    # print(type(c))
     return c
 
 
@@ -23,3 +24,5 @@ def aesDecrypt(c, aes_k):
     temp_m = decipher.decrypt(c)
     m = str(unpad(temp_m, BLOCK_SIZE))[2:-1]
     return m
+if __name__ == '__main__':
+    aesEncrypt(bytes(8),'A92Ui8,!ufala0cM')

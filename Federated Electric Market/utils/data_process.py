@@ -94,5 +94,4 @@ def seq_to_mul(seq_len, B, num, path):
 
 # 得到mape值,作为模型性能衡量指标
 def get_mape(x, y):
-
     return np.mean(np.abs((x - y) / x))

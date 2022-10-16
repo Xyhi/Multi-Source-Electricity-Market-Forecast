@@ -20,12 +20,14 @@ class server():
         self.frac = args.frac
         self.all_clients = args.all_clients
         self.weight_decay = args.weight_decay
-        self.round = args.round     # 保留位数
+        self.round = args.round
 
         self.iter = 0  # 返回迭代的次数
         self.rsa_public_k, self.rsa_private_k = self.get_rsa_key()  # server端持有rsa的私钥
         self.aes_k = self.get_aes_key()  # client端持有aes密钥
+        print('server get key completed')
         self.client_list = self.build_all_clients()
+        print('server build_all_clients completed')
         self.model = BiLSTM(args).to(args.device)
         self.notice(self.client_list)
 
@@ -95,20 +97,26 @@ class server():
         else:
             # 按照一定比例选择client
             m = max(int(self.frac * self.num_users), 1)
-            idxs_users = np.random.choice(range(self.num_users), m, replace=False)  # 这里num_users112
+            idxs_users = np.random.choice(range(self.num_users), m, replace=False)
             clients = [self.client_list[i] for i in idxs_users]
 
-        for one_client in clients:
-            parameter, loss = one_client.train()    # 这里的parameter和loss是加密过的
+        for num, one_client in enumerate(clients):
+            parameter, loss = one_client.train(num)
             parameter_list.append(parameter)
             loss_list.append(loss)
 
         parameters = []
-        shape_list = get_shape_list(self.model) # 获取参数的numpy格式
-        # 对server端传来的parameter进行解密 （这里应该是client端？）
+        shape_list = get_shape_list(self.model)
+        # 对server端传来的parameter进行解密
         print('server is decrypting')
+        # for item in parameter_list:
+        #     m = rsaDecrypt(item, self.rsa_private_k)
+        #     param = str_to_parameter(m, shape_list, self.round)
+        #     parameters.append(param)
+        # print('server decryption completes')
+        # 用aes解密（节省时间）
         for item in parameter_list:
-            m = rsaDecrypt(item, self.rsa_private_k)
+            m = aesDecrypt(item, self.aes_k)
             param = str_to_parameter(m, shape_list, self.round)
             parameters.append(param)
         print('server decryption completes')
@@ -138,4 +146,4 @@ class server():
 
         self.iter += 1
         # 返回损失误差
-        return np.mean(loss_list)
+        return np.mean(loss_list,axis=0)
