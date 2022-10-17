@@ -11,7 +11,7 @@ import warnings
 import os
 warnings.filterwarnings('ignore')
 root_path = 'source_data/data'
-loss_type = ['MSE', 'MAE', 'RMSE']
+loss_type = ['index','MSE', 'MAE', 'RMSE']
 
 # 更新参数：根据输入的要改变的参数和列表，返回一个元素为args的列表
 def update_args(args,name,values):
@@ -30,13 +30,11 @@ def build_dir(path):
 # 保存训练集误差的表、图；测试集误差的表，图
 def save_data(loss_train, tol_test_loss,path1,path2,path3,path4):
 
-    loss_train = np.array(loss_train)
-    tol_test_loss = np.array(tol_test_loss)
-
     # 保存训练集误差
     loss_train_df = pd.DataFrame(loss_train)
     loss_train_df.columns = loss_type
-    loss_train_df.to_excel(path1)
+    loss_train_df.set_index('index')
+    loss_train_df.to_excel(path1,index=False)
     # 绘图
     for i in range(3):
         plt.plot(range(len(loss_train)), loss_train[:,i])
@@ -47,7 +45,8 @@ def save_data(loss_train, tol_test_loss,path1,path2,path3,path4):
     # 保存测试集误差
     loss_test_df = pd.DataFrame(tol_test_loss)
     loss_test_df.columns = loss_type
-    loss_test_df.to_excel(path3)
+    loss_test_df.set_index('index')
+    loss_test_df.to_excel(path3,index=False)
     # 绘图
     for i in range(3):
         plt.boxplot(tol_test_loss[:,i])
@@ -69,29 +68,6 @@ def save_result(loss_train, tol_test_loss, arg_name, arg_val):
     # 保存
     save_data(loss_train,tol_test_loss,path1,path2,path3,path4)
 
-    # # 保存训练集各轮损失值
-    # loss_train_df = pd.DataFrame(loss_train)
-    # loss_train_df.columns = loss_type
-    # loss_train_df.to_excel('./result_excel/train_loss/{}/{}={}.xlsx'.format(arg_name,arg_name,arg_val))
-    # # 绘图
-    # for i in range(3):
-    #     plt.plot(range(len(loss_train)), loss_train[:,i])
-    #     plt.ylabel('train_loss '+loss_type[i])
-    #     plt.savefig(
-    #         './result_img/train_loss/{}/{}={}-{}.png'.format(arg_name,arg_name,arg_val,loss_type[i]))
-    #     plt.show()
-    #
-    # # 保存各客户端测试集损失值
-    # loss_test_df = pd.DataFrame(tol_test_loss)
-    # loss_test_df.columns = loss_type
-    # loss_test_df.to_excel('./result_excel/test_loss/{}/{}={}.xlsx'.format(arg_name,arg_name,arg_val))
-    #
-    # for i in range(3):
-    #     plt.boxplot(tol_test_loss[:,i])
-    #     plt.savefig(
-    #         './result_img/test_loss/{}/{}={}-{}.png'.format(arg_name,arg_name,arg_val,loss_type[i]))
-    #     plt.show()
-
 # 调参过程中的模型训练和测试; arg_name, arg_val用于保存信息
 def train_test(server, arg_name, arg_val):
     loss_train = []
@@ -112,18 +88,29 @@ def train_test(server, arg_name, arg_val):
 
     print("Average test Loss: ", np.mean(tol_test_loss,axis=0))
 
+    # 为要保留的数据增加索引
+    loss_train_ = np.array(loss_train)
+    tol_test_loss_ = np.array(tol_test_loss)
+    loss_train_ = np.c_[np.array(range(args.tol_epochs)), loss_train_]
+    tol_test_loss_ = np.c_[np.array(range(args.num_users)), tol_test_loss_]
     # 保存结果
-    save_result(loss_train, tol_test_loss, arg_name, arg_val)
+    save_result(loss_train_, tol_test_loss_, arg_name, arg_val)
 
     return np.mean(loss_train,axis=0), np.mean(tol_test_loss,axis=0)
 
 if __name__ == '__main__':
 
     args = args()
+    # 固定参数的部分：
+    args.frac = 0.1
+    args.tol_epochs = 15
+
 
 # 调参部分👇
     # 可添加参数对一系列参数进行训练和测试。   update_args: 返回一个元素类型与args()相同的列表
-    all_args = {'frac':update_args(args, 'frac', [0.05, 0.1, 0.2, 0.3]),
+    all_args = {#'frac':update_args(args, 'frac', [0.05,0.1,0.2,0.3]),
+                #'tol_epochs':update_args(args, 'tol_epochs', [1,5,10,15,20]),
+                'local_epochs': update_args(args, 'local_epochs', [5, 10, 15, 20])
                 }
     # args_list = update_args(args, 'frac', [0.05, 0.1, 0.2, 0.3])
     # print(args_list)
@@ -153,30 +140,13 @@ if __name__ == '__main__':
         path2 = './result_compare/{}/train/{}.png'.format(name, name)
         path3 = './result_compare/{}/test/{}.xlsx'.format(name, name)
         path4 = './result_compare/{}/test/{}.png'.format(name, name)
+        # 为要保留的数据增加索引
+        train_loss = np.array(train_loss)
+        test_loss = np.array(test_loss)
+        index = np.array([i.__dict__[name] for i in all_args[name]])
+        train_loss = np.c_[index,train_loss]
+        test_loss = np.c_[index, test_loss]
+
         save_data(train_loss, test_loss, path1, path2, path3, path4)
 
 
-
-
-
-    # loss_train = []
-    # # 进行本地模型训练
-    # for iter in range(args.tol_epochs):
-    #     local_loss = server.train()
-    #     loss_train.append(local_loss)
-    #     print('ROUND {}: loss is {}'.format(iter, local_loss))
-    # plt.plot(range(len(loss_train)), loss_train)
-    # plt.ylabel('train_loss')
-    # plt.show()
-    #
-    # # 测试对所有的client的训练集的误差
-    # tol_test_loss = []
-    # final_network = './network/network{}.pkl'.format(args.tol_epochs - 1)
-    # for idx in range(args.num_users):
-    #     _, _, test_data, max_load, min_load = load_data(args, args.local_bs, root_path+str(idx)+'.xlsx')
-    #     test_loss = test(args, test_data, final_network, max_load, min_load,idx)
-    #     tol_test_loss.append(test_loss)
-    #
-    # print("Average test Loss: ", np.mean(tol_test_loss))
-    # plt.boxplot(tol_test_loss)
-    # plt.show()
